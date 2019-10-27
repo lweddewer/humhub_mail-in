@@ -55,19 +55,19 @@ class ConsoleController extends Controller
 		// Suppress bogus warning on imap_open (and non-bogus ones on imap_createmailbox)
 		error_reporting(E_ALL & ~E_NOTICE & ~E_USER_NOTICE);
 
-		$conn= "{".$server.'}';
-		$this->imap= @imap_open(imap_utf7_encode($conn.'INBOX'), $username, $password);
+		$conn= "{".$server.'/novalidate-cert}';
+		$this->imap= @imap_open(imap_utf7_encode($conn.$mailbox), $username, $password);
 		if ($this->imap === false) {
 			printf("get_mails_imap(): Failed to open imap connection '%s' user:'%s' pw:'%s'.\n", $conn, $username, $password);
 			return null;
 		}
 
 		//TODO: check if mailbox already exists
-		imap_createmailbox($this->imap, imap_utf7_encode($conn.self::MBX_IGNORED));
-		imap_createmailbox($this->imap, imap_utf7_encode($conn.self::MBX_POSTED));
+		imap_createmailbox($this->imap, imap_utf7_encode($conn.$mailbox.'.'.self::MBX_IGNORED));
+		imap_createmailbox($this->imap, imap_utf7_encode($conn.$mailbox.'.'.self::MBX_POSTED));
 
-		$this->mbx_ignored= imap_utf7_encode(self::MBX_IGNORED);
-		$this->mbx_posted= imap_utf7_encode(self::MBX_POSTED);
+		$this->mbx_ignored= imap_utf7_encode($mailbox.','.self::MBX_IGNORED);
+		$this->mbx_posted= imap_utf7_encode($mailbox.'.'.self::MBX_POSTED);
 
 		$r= [];
 		$count= imap_num_msg($this->imap);
